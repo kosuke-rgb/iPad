@@ -15,6 +15,9 @@
 | [docs/04_results.md](docs/04_results.md) | Step 4〜13: Baseline 比較・アブレーション・発見ループ・量子化 |
 | [docs/05_memory_redesign.md](docs/05_memory_redesign.md) | 第2ラウンド: 長期記憶の原因分析・再設計・3シード比較 |
 | [docs/06_scaling.md](docs/06_scaling.md) | LLM の大きさ・学習量を変えたときの、各モジュールの寄与 |
+| [docs/07_sleep_and_world_model.md](docs/07_sleep_and_world_model.md) | 睡眠による記憶の定着、学習した世界モデル（暫定） |
+| [docs/phase1_diagnosis.md](docs/phase1_diagnosis.md) | フェーズ1: 探索予算のスイープ・正解の出どころ・アブレーションの再検証 |
+| [docs/summary_for_chat.md](docs/summary_for_chat.md) | 相談用のまとめ（1ファイルで完結） |
 
 ## 構成
 
