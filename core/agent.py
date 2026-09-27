@@ -31,6 +31,8 @@ class AgentConfig:
     use_simulator: bool = False
     use_rag: bool = False
     use_memory: bool = False
+    memory_version: int = 2      # 1: 初版（固定重みのマクロ）, 2: 証拠に基づくマクロ＋類似経験のみ
+    use_macros: bool = False     # マクロは有意な効果が確認できなかったので既定で OFF（docs/05）
     use_experts: bool = False
     use_router: bool = False
     use_compose: bool = False
@@ -92,7 +94,9 @@ class Agent:
         if stage == "sample":
             return [Hypothesis(p, "llm", lp) for p, lp in self.lm.sample(examples, c.n_samples, c.temperature, meter)]
         if stage == "memory":
-            return [Hypothesis(p, "memory") for p in self.memory.retrieve(fvec, 8, verified_only=c.use_simulator)]
+            min_sim = 0.8 if c.memory_version >= 2 else 0.0
+            return [Hypothesis(p, "memory") for p in
+                    self.memory.retrieve(fvec, 8, verified_only=c.use_simulator, min_similarity=min_sim)]
         if stage == "rag":
             return [Hypothesis(p, "rag") for p in self.kb.retrieve(fvec, 8)]
         if stage == "experts":
@@ -101,7 +105,7 @@ class Agent:
             frags = wm.fragment_stats()
             for p in PRIM_NAMES:  # 未観測の部品にも小さな確率を残す（探索の完全性）
                 frags[p] += 0.05
-            macros = self.memory.macros() if c.use_memory else []
+            macros = self._macros(fvec)
             return [Hypothesis(p, "compose") for p in compose(frags, macros)]
         if stage == "repair":
             out = []
@@ -109,6 +113,14 @@ class Agent:
                 out += [Hypothesis(p, "repair") for p in mutations(h.program)]
             return out
         raise ValueError(stage)
+
+    def _macros(self, fvec):
+        c = self.cfg
+        if not (c.use_memory and c.use_macros):
+            return []
+        if c.memory_version == 1:
+            return self.memory.macros()
+        return self.memory.weighted_macros(fvec, min_support=2.0, min_similarity=0.5)
 
     # ------------------------------------------------------------------ solve
     def solve(self, examples, test_inputs) -> Result:
@@ -221,6 +233,16 @@ def baseline_configs():
         BASE.variant("S: LLM + Simulator (sample & verify x16)", n_samples=16, use_simulator=True, use_critic=True),
         AgentConfig(name="N: Enumeration (no LLM)", use_llm=False, enumerate=True),
         PROPOSED,
+    ]
+
+
+def memory_configs():
+    """長期記憶の設計比較（docs/05_memory_redesign.md）。"""
+    return [
+        PROPOSED.variant("Memory: none", use_memory=False),
+        PROPOSED.variant("Memory v1 (fixed-weight macros)", memory_version=1),
+        PROPOSED.variant("Memory v2 retrieval only (no macros)", use_macros=False),
+        PROPOSED.variant("Memory v2 (evidence-weighted macros)", use_macros=True),
     ]
 
 

@@ -99,7 +99,7 @@ class DiscoveryAgent:
             frags = wm.fragment_stats()
             for p in PRIM_NAMES:
                 frags[p] += 0.05
-            macros = self.memory.macros() if self.memory is not None else []
+            macros = self.memory.weighted_macros(vector(features(obs)), min_similarity=0.5) if self.memory is not None else {}
             extra = compose(frags, macros, limit=self.budget)
             for h in wm.best_partial(2):
                 extra += mutations(h.program)

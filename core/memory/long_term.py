@@ -32,14 +32,18 @@ class LongTermMemory:
     def store(self, ep: Episode):
         self.episodes.append(ep)
 
-    def retrieve(self, fvec: tuple, k: int = 8, verified_only: bool = False) -> list:
+    def retrieve(self, fvec: tuple, k: int = 8, verified_only: bool = False,
+                 min_similarity: float = 0.0) -> list:
         """特徴が似た過去エピソードの結論を、似ている順・よく使われた順に返す。"""
         freq = Counter(e.conclusion for e in self.episodes if e.conclusion)
         scored = {}
         for e in self.episodes:
             if not e.conclusion or (verified_only and e.result != "verified"):
                 continue
-            s = similarity(fvec, e.features) + 0.01 * freq[e.conclusion]
+            sim = similarity(fvec, e.features)
+            if sim < min_similarity:
+                continue
+            s = sim + 0.01 * freq[e.conclusion]
             scored[e.conclusion] = max(scored.get(e.conclusion, 0.0), s)
         return [p for p, _ in sorted(scored.items(), key=lambda kv: -kv[1])[:k]]
 
@@ -53,6 +57,26 @@ class LongTermMemory:
                     for j in range(i + 2, len(p) + 1):
                         c[p[i:j]] += 1
         return [m for m, _ in c.most_common(k)]
+
+    def weighted_macros(self, fvec: tuple | None = None, min_support: float = 2.0,
+                        min_similarity: float = 0.0, k: int = 8) -> dict:
+        """v2: 証拠に基づくマクロ。{マクロ: 支持度} を返す。
+
+        支持度 = そのマクロを含む検証済みエピソードの数（特徴の類似度で重みづけ）。
+        1回しか現れない部分手順は偶然の可能性が高いので使わない。
+        """
+        c = Counter()
+        for e in self.episodes:
+            if e.result != "verified" or not e.conclusion or len(e.conclusion) < 2:
+                continue
+            w = 1.0 if fvec is None else similarity(fvec, e.features)
+            if w < min_similarity:
+                continue
+            p = e.conclusion
+            subs = {p[i:j] for i in range(len(p)) for j in range(i + 2, len(p) + 1)}
+            for m in subs:
+                c[m] += w
+        return {m: s for m, s in c.most_common(k) if s >= min_support}
 
     def known_programs(self) -> set:
         return {e.conclusion for e in self.episodes if e.conclusion}

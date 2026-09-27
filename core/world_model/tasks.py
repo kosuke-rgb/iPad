@@ -137,3 +137,26 @@ def make_task(rng: random.Random, split: str) -> Task:
 def make_benchmark(split: str, n: int, seed: int) -> list:
     rng = random.Random(seed)
     return [make_task(rng, split) for _ in range(n)]
+
+
+def make_related_benchmark(base_programs, n: int, seed: int) -> list:
+    """OOD-関連: 以前に見た深さ2の規則に、1手順を前後いずれかに足した深さ3の問題。
+
+    「経験が役に立ちうる」状況で記憶の効果を測るための分割。
+    記憶に有利になるよう作ってあるので、他の分割とは分けて報告する。
+    """
+    rng = random.Random(seed)
+    s = sigs()
+    out = []
+    while len(out) < n:
+        base = tuple(rng.choice(base_programs))
+        extra = rng.choice(PRIM_NAMES)
+        p = (extra,) + base if rng.random() < 0.5 else base + (extra,)
+        if signature(p) in s.all_upto2:
+            continue
+        ex = _examples(rng, p, 6)
+        if ex is None or not _informative(ex[:3]):
+            continue
+        out.append(Task(program=p, train=ex[:3], test=ex[3:], split="ood_related",
+                        meta={"base": base}))
+    return out

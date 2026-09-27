@@ -16,17 +16,35 @@ from core.world_model.dsl import PRIM_NAMES
 MAX_DEPTH = 4
 
 
+MACRO_MASS_CAP = 0.3
+MACRO_MASS_KAPPA = 10.0
+
+
 def compose(fragments, macros, max_units=3, limit=4000):
-    """部品の頻度を確率とみなし、対数確率の高い順に組み合わせを返す。"""
+    """部品の頻度を確率とみなし、対数確率の高い順に組み合わせを返す。
+
+    macros:
+      - list: v1。各マクロに固定の重み 0.15 を与える（実験で予算の浪費を招いた）
+      - dict {マクロ: 支持度}: v2。マクロ全体に確率質量 λ = S/(S+κ)（上限0.3、S は支持度の合計）
+        を割り当て、支持度に比例して配分する。部品の確率は残りの 1-λ を分け合う。
+    """
     units = [(f,) for f in fragments] + [tuple(m) for m in macros]
     if not units:
         return []
     weights = {}
     total = sum(fragments.values()) or 1.0
-    for f, c in fragments.items():
-        weights[(f,)] = c / total
-    for m in macros:
-        weights[tuple(m)] = max(weights.get(tuple(m), 0.0), 0.15)
+    if isinstance(macros, dict) and macros:
+        support = sum(macros.values())
+        lam = min(MACRO_MASS_CAP, support / (support + MACRO_MASS_KAPPA))
+        for f, c in fragments.items():
+            weights[(f,)] = (1 - lam) * c / total
+        for m, sup in macros.items():
+            weights[tuple(m)] = weights.get(tuple(m), 0.0) + lam * sup / support
+    else:
+        for f, c in fragments.items():
+            weights[(f,)] = c / total
+        for m in macros:
+            weights[tuple(m)] = max(weights.get(tuple(m), 0.0), 0.15)
     logw = {u: math.log(max(w, 1e-6)) for u, w in weights.items()}
     # プリミティブ1つごとのペナルティ（短い説明を優先）。部品単位で数えると、
     # マクロを使った長いプログラムが不当に安く見え、探索予算を浪費する（実験で確認）。
