@@ -240,7 +240,7 @@ def memory_configs():
     """長期記憶の設計比較（docs/05_memory_redesign.md）。"""
     return [
         PROPOSED.variant("Memory: none", use_memory=False),
-        PROPOSED.variant("Memory v1 (fixed-weight macros)", memory_version=1),
+        PROPOSED.variant("Memory v1 (fixed-weight macros)", memory_version=1, use_macros=True),
         PROPOSED.variant("Memory v2 retrieval only (no macros)", use_macros=False),
         PROPOSED.variant("Memory v2 (evidence-weighted macros)", use_macros=True),
     ]
