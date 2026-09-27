@@ -1,0 +1,13 @@
+パラメータ数(埋め込み除く): 0.80M
+step     1 | loss 3.911 | 1s
+step   100 | loss 1.724 | 37s
+step   200 | loss 1.621 | 73s
+step   300 | loss 1.639 | 110s
+step   400 | loss 1.538 | 148s
+step   500 | loss 1.583 | 184s
+step   600 | loss 1.367 | 222s
+step   700 | loss 1.423 | 421s
+step   800 | loss 1.420 | 672s
+step   900 | loss 1.409 | 944s
+step  1000 | loss 1.473 | 1019s
+step  1100 | loss 1.445 | 1054s
