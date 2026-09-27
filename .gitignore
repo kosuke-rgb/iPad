@@ -8,3 +8,4 @@ results/quant_log.txt
 results/main_v1_log.txt
 results/memory_log*.txt
 results/scaling/train_*.txt
+results/scaling/eval_*.txt
