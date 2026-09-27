@@ -118,9 +118,12 @@ class DiscoveryAgent:
         x, y = inv.observations[-1]
         inv.candidates = [p for p in inv.candidates if safe_run(p, x) == y]
 
+    CONFIRMATION_UNCERTAINTY = 0.8
+    NO_HYPOTHESIS_UNCERTAINTY = 0.7  # 仮説が1つもない対象（∞にすると、そこへ問い合わせが吸い込まれ続ける）
+
     def _uncertainty(self, inv: Investigation, pool) -> float:
         if not inv.candidates:
-            return float("inf")
+            return self.NO_HYPOTHESIS_UNCERTAINTY
         best = 0.0
         for x in pool:
             g = Counter()
@@ -128,6 +131,8 @@ class DiscoveryAgent:
                 o = safe_run(p, x)
                 g[tuple(o) if o is not None else None] += _prior(p)
             best = max(best, _entropy(g))
+        if best == 0.0 and len(inv.observations) < 3:
+            return self.CONFIRMATION_UNCERTAINTY  # 仮説は1つに絞れたが、確認の実験がまだ
         return best
 
     # -------------------------------------------------------- experiment design
@@ -158,6 +163,11 @@ class DiscoveryAgent:
             for i in open_invs:
                 if not i.generated or not i.candidates:
                     self._generate(i)
+                    if self._settled(i):
+                        self._conclude(i)
+            open_invs = [i for i in open_invs if i.concluded is None]
+            if not open_invs:
+                break
             # Generate New Questions: 最も不確かな対象を次に調べる（好奇心）
             if self.curiosity:
                 pool = [random_input(self.rng) for _ in range(10)]
@@ -171,13 +181,18 @@ class DiscoveryAgent:
             if not target.candidates:
                 target.generated = False  # すべて反証された → 仮説を作り直す
                 continue
-            behaviours = {signature(p) for p in target.candidates}
-            if len(behaviours) == 1 and len(target.observations) >= 3:
+            if self._settled(target):
                 self._conclude(target)
         for i in invs:
             if i.concluded is None and i.candidates:
                 self._conclude(i, final=True)
         return self._report(invs, used)
+
+    @staticmethod
+    def _settled(inv: Investigation) -> bool:
+        """残った仮説の振る舞いが1つに絞れ、観測も3つ以上あれば結論を出す。"""
+        return (bool(inv.candidates) and len(inv.observations) >= 3
+                and len({signature(p) for p in inv.candidates}) == 1)
 
     def _conclude(self, inv: Investigation, final=False):
         best = min(inv.candidates, key=lambda p: (len(p), len(self.critic.flags(p))))

@@ -28,14 +28,16 @@ def compose(fragments, macros, max_units=3, limit=4000):
     for m in macros:
         weights[tuple(m)] = max(weights.get(tuple(m), 0.0), 0.15)
     logw = {u: math.log(max(w, 1e-6)) for u, w in weights.items()}
-    penalty = math.log(0.3)  # 部品を1つ足すごとのペナルティ（短い説明を優先）
+    # プリミティブ1つごとのペナルティ（短い説明を優先）。部品単位で数えると、
+    # マクロを使った長いプログラムが不当に安く見え、探索予算を浪費する（実験で確認）。
+    penalty = math.log(0.3)
     heap = []
     for n in range(1, max_units + 1):
         for combo in itertools.product(units, repeat=n):
             prog = tuple(itertools.chain.from_iterable(combo))
             if len(prog) > MAX_DEPTH:
                 continue
-            score = sum(logw[u] for u in combo) + penalty * n
+            score = sum(logw[u] for u in combo) + penalty * len(prog)
             heapq.heappush(heap, (-score, prog))
     seen, out = set(), []
     while heap and len(out) < limit:
