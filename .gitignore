@@ -2,3 +2,6 @@ checkpoints/
 *.pt
 __pycache__/
 results/train_log.txt
+results/main_log.txt
+results/discovery_log.txt
+results/quant_log.txt
