@@ -210,5 +210,6 @@ class DiscoveryAgent:
     def _report(self, invs, used) -> dict:
         correct = [i.oracle.is_identified_by(i.concluded) for i in invs]
         return {"identified": sum(correct), "total": len(invs), "queries_used": used,
+                "per_function": [bool(c) for c in correct],
                 "llm_gflops": self.meter.llm_flops / 1e9, "sim_calls": self.meter.sim_calls,
                 "log": self.log}

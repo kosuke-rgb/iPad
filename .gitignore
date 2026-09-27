@@ -13,3 +13,4 @@ results/scaling/eval_*.txt
 results/scaling/*_seed*.json
 results/sleep_log_*.txt
 results/world_model/train_log.txt
+results/phase1/run_log.txt
