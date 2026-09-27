@@ -17,6 +17,7 @@ from core.world_model.tasks import make_task
 
 
 def make_batch(rng, batch_size, block_size):
+    """パディングはバッチ内の最長系列まで（block_size まで埋めると計算の約3/4が無駄になる）。"""
     xs, ys = [], []
     while len(xs) < batch_size:
         t = make_task(rng, "train")
@@ -25,11 +26,11 @@ def make_batch(rng, batch_size, block_size):
         seq = prompt + target
         if len(seq) > block_size + 1:
             continue
-        x = seq[:-1]
-        y = [-100] * (len(prompt) - 1) + target  # プログラム部分だけ損失を計算
-        pad = block_size - len(x)
-        xs.append(x + [T.PAD_ID] * pad)
-        ys.append(y + [-100] * pad)
+        xs.append(seq[:-1])
+        ys.append([-100] * (len(prompt) - 1) + target)  # プログラム部分だけ損失を計算
+    L = max(len(x) for x in xs)
+    xs = [x + [T.PAD_ID] * (L - len(x)) for x in xs]
+    ys = [y + [-100] * (L - len(y)) for y in ys]
     return torch.tensor(xs), torch.tensor(ys)
 
 
@@ -45,6 +46,7 @@ def main():
     ap.add_argument("--lr", type=float, default=2e-3)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--threads", type=int, default=0)
+    ap.add_argument("--save_every", type=int, default=0, help="途中のチェックポイントを保存する間隔")
     args = ap.parse_args()
     if args.threads:
         torch.set_num_threads(args.threads)
@@ -70,9 +72,16 @@ def main():
         sched.step()
         if it % 100 == 0 or it == 1:
             print(f"step {it:5d} | loss {loss.item():.3f} | {time.time() - t0:.0f}s", flush=True)
-    os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
-    torch.save({"model": model.state_dict(), "config": cfg.__dict__, "vocab": T.VOCAB}, args.out)
-    print(f"保存しました: {args.out}")
+        if args.save_every and it % args.save_every == 0 and it < args.max_iters:
+            save(model, cfg, args.out.replace(".pt", f"_step{it}.pt"), it, time.time() - t0)
+    save(model, cfg, args.out, args.max_iters, time.time() - t0)
+
+
+def save(model, cfg, path, steps, seconds):
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    torch.save({"model": model.state_dict(), "config": cfg.__dict__, "vocab": T.VOCAB,
+                "train_steps": steps, "train_seconds": seconds}, path)
+    print(f"保存しました: {path}", flush=True)
 
 
 if __name__ == "__main__":
