@@ -1,3 +1,4 @@
 checkpoints/
 *.pt
 __pycache__/
+results/train_log.txt
