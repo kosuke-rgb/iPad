@@ -9,4 +9,5 @@ results/main_v1_log.txt
 results/memory_log*.txt
 results/scaling/train_*.txt
 results/scaling/eval_*.txt
-results/scaling/*_seed*.json  # 実験中は無視し、完了後に git add -f で追加
+# 実験中は無視し、完了後に git add -f で追加
+results/scaling/*_seed*.json
