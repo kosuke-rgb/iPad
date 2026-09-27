@@ -11,3 +11,5 @@ results/scaling/train_*.txt
 results/scaling/eval_*.txt
 # 実験中は無視し、完了後に git add -f で追加
 results/scaling/*_seed*.json
+results/sleep_log_*.txt
+results/world_model/train_log.txt

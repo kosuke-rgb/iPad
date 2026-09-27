@@ -16,22 +16,34 @@ from core.world_model.dsl import to_str
 from core.world_model.tasks import make_task
 
 
-def make_batch(rng, batch_size, block_size):
+def encode_pair(examples, program, block_size):
+    """(例, プログラム) を学習用の (入力, 目標) に変換。長すぎれば None。"""
+    prompt = T.encode(T.fmt_examples(examples))
+    target = T.encode(to_str(program) + "\n")
+    seq = prompt + target
+    if len(seq) > block_size + 1:
+        return None
+    return seq[:-1], [-100] * (len(prompt) - 1) + target  # プログラム部分だけ損失を計算
+
+
+def collate(pairs):
     """パディングはバッチ内の最長系列まで（block_size まで埋めると計算の約3/4が無駄になる）。"""
-    xs, ys = [], []
-    while len(xs) < batch_size:
-        t = make_task(rng, "train")
-        prompt = T.encode(T.fmt_examples(t.train))
-        target = T.encode(to_str(t.program) + "\n")
-        seq = prompt + target
-        if len(seq) > block_size + 1:
-            continue
-        xs.append(seq[:-1])
-        ys.append([-100] * (len(prompt) - 1) + target)  # プログラム部分だけ損失を計算
+    xs = [x for x, _ in pairs]
+    ys = [y for _, y in pairs]
     L = max(len(x) for x in xs)
     xs = [x + [T.PAD_ID] * (L - len(x)) for x in xs]
     ys = [y + [-100] * (L - len(y)) for y in ys]
     return torch.tensor(xs), torch.tensor(ys)
+
+
+def make_batch(rng, batch_size, block_size):
+    pairs = []
+    while len(pairs) < batch_size:
+        t = make_task(rng, "train")
+        e = encode_pair(t.train, t.program, block_size)
+        if e is not None:
+            pairs.append(e)
+    return collate(pairs)
 
 
 def main():
