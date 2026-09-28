@@ -17,6 +17,7 @@
 | [docs/06_scaling.md](docs/06_scaling.md) | LLM の大きさ・学習量を変えたときの、各モジュールの寄与 |
 | [docs/07_sleep_and_world_model.md](docs/07_sleep_and_world_model.md) | 睡眠による記憶の定着、学習した世界モデル（暫定） |
 | [docs/phase1_diagnosis.md](docs/phase1_diagnosis.md) | フェーズ1: 探索予算のスイープ・正解の出どころ・アブレーションの再検証 |
+| [docs/phase1_5.md](docs/phase1_5.md) | フェーズ1.5: 既定の変更、世界モデル・睡眠の再現、睡眠の対照実験、記憶の再設計、忘却対策 |
 | [docs/summary_for_chat.md](docs/summary_for_chat.md) | 相談用のまとめ（1ファイルで完結） |
 
 ## 構成

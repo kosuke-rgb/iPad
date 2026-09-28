@@ -1,0 +1,85 @@
+done ('agent', 'tau0.7', 200, 9) 109s
+done ('agent', 'tau0.8', 200, 9) 110s
+done ('agent', 'tau0.8', 2000, 9) 129s
+done ('agent', 'tau0.7', 2000, 9) 129s
+done ('agent', 'tau0.9', 200, 9) 105s
+done ('agent', 'tau1.0', 200, 9) 108s
+done ('agent', 'tau0.9', 2000, 9) 126s
+done ('agent', 'tau1.0', 2000, 9) 129s
+--- restart Mon Sep 28 01:51:33 UTC 2026
+done ('ewc_cal', 10000.0, 9) 152s
+done ('ewc_cal', 100.0, 9) 153s
+done ('ewc_cal', 1000.0, 9) 153s
+done ('ewc_cal', 10.0, 9) 153s
+--- restart Mon Sep 28 01:56:44 UTC 2026
+done ('sleep_cal_base', 9) 132s
+done ('ewc_cal', 100000.0, 9) 143s
+tau* 1.0 lambda* 100000.0
+stage2: 66 jobs
+done ('sleep', 'a_no_sleep', 0) 98s
+done ('sleep', 'a_no_sleep', 1) 97s
+done ('sleep', 'a_no_sleep', 2) 100s
+done ('sleep', 'b_awake_experience', 0) 357s
+done ('sleep', 'b_awake_experience', 1) 353s
+done ('sleep', 'b_awake_experience', 2) 354s
+done ('sleep', 'b2_awake_mixture', 0) 489s
+done ('wm', 1) 2209s
+done ('sleep', 'b2_awake_mixture', 1) 471s
+done ('wm', 2) 2338s
+done ('wm', 0) 2392s
+done ('sleep', 'b2_awake_mixture', 2) 476s
+done ('sleep', 'c_sleep', 0) 527s
+done ('sleep', 'c_sleep', 1) 526s
+done ('sleep', 'c_sleep', 2) 528s
+done ('sleep', 'f_base', 0) 541s
+done ('sleep', 'f_base', 1) 520s
+done ('sleep', 'd_sleep_wm_dreams', 0) 1560s
+done ('sleep', 'd_sleep_wm_dreams', 2) 1507s
+done ('sleep', 'd_sleep_wm_dreams', 1) 1563s
+done ('sleep', 'f_base', 2) 517s
+done ('sleep', 'f_dream_rehearsal', 0) 530s
+done ('sleep', 'f_more_rehearsal', 0) 966s
+done ('sleep', 'f_more_rehearsal', 1) 927s
+done ('sleep', 'f_more_rehearsal', 2) 915s
+done ('sleep', 'f_dream_rehearsal', 1) 516s
+done ('sleep', 'f_dream_rehearsal', 2) 530s
+done ('agent', 'default', 10, 0) 87s
+done ('sleep', 'f_ewc', 0) 556s
+done ('sleep', 'f_ewc', 1) 551s
+done ('agent', 'no_memory', 10, 0) 110s
+done ('agent', 'new_memory', 10, 0) 112s
+done ('agent', 'default', 50, 0) 111s
+done ('agent', 'no_memory', 50, 0) 116s
+done ('agent', 'new_memory', 50, 0) 118s
+done ('sleep', 'f_ewc', 2) 547s
+done ('agent', 'default', 200, 0) 118s
+done ('agent', 'no_memory', 200, 0) 125s
+done ('agent', 'new_memory', 200, 0) 117s
+done ('agent', 'default', 2000, 0) 140s
+done ('agent', 'no_memory', 2000, 0) 136s
+done ('agent', 'default', 10, 1) 85s
+done ('agent', 'new_memory', 2000, 0) 132s
+done ('agent', 'no_memory', 10, 1) 111s
+done ('agent', 'new_memory', 10, 1) 110s
+done ('agent', 'default', 50, 1) 108s
+done ('agent', 'no_memory', 50, 1) 115s
+done ('agent', 'new_memory', 50, 1) 117s
+done ('agent', 'default', 200, 1) 114s
+done ('agent', 'no_memory', 200, 1) 119s
+done ('agent', 'new_memory', 200, 1) 113s
+done ('agent', 'default', 2000, 1) 135s
+done ('agent', 'no_memory', 2000, 1) 133s
+done ('agent', 'default', 10, 2) 88s
+done ('agent', 'new_memory', 2000, 1) 132s
+done ('agent', 'no_memory', 10, 2) 111s
+done ('agent', 'new_memory', 10, 2) 112s
+done ('agent', 'default', 50, 2) 108s
+done ('agent', 'no_memory', 50, 2) 112s
+done ('agent', 'new_memory', 50, 2) 109s
+done ('agent', 'default', 200, 2) 108s
+done ('agent', 'no_memory', 200, 2) 112s
+done ('agent', 'new_memory', 200, 2) 106s
+done ('agent', 'no_memory', 2000, 2) 123s
+done ('agent', 'default', 2000, 2) 127s
+done ('agent', 'new_memory', 2000, 2) 124s
+PHASE15_RUN_DONE

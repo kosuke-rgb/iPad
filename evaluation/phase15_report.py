@@ -139,7 +139,7 @@ def section_wm(L):
           "|---|---|---|---|---|---|"]
     tests = []
     for R in ("1", "2", "5", "10", "30", "10000"):
-        col = {c: [x for r in runs for x in r["per_task"][c][R]] for c in r["per_task"]}
+        col = {c: [x for r in runs for x in r["per_task"][c][R]] for c in runs[0]["per_task"]}
         acc = {c: [int(x[0]) for x in v] for c, v in col.items()}
         used = {c: mean([x[1] for x in v]) for c, v in col.items()}
         L.append(f"| {'無制限' if R == '10000' else R} | {ci(acc['real_only'])} | {ci(acc['imagine_then_act'])} | "
