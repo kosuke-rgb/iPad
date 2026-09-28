@@ -33,6 +33,8 @@ class AgentConfig:
     use_memory: bool = False
     memory_version: int = 2      # 1: 初版（固定重みのマクロ）, 2: 証拠に基づくマクロ＋類似経験のみ
     use_macros: bool = False     # マクロは有意な効果が確認できなかったので既定で OFF（docs/05）
+    memory_min_similarity: float = 0.8  # 起きている間の検索に使う類似度のしきい値（v2）
+    memory_min_budget: int = 0          # 予算がこれ未満なら、起きている間は記憶を検索しない
     use_experts: bool = False
     use_router: bool = False
     use_compose: bool = False
@@ -94,7 +96,9 @@ class Agent:
         if stage == "sample":
             return [Hypothesis(p, "llm", lp) for p, lp in self.lm.sample(examples, c.n_samples, c.temperature, meter)]
         if stage == "memory":
-            min_sim = 0.8 if c.memory_version >= 2 else 0.0
+            if c.sim_budget < c.memory_min_budget:
+                return []
+            min_sim = c.memory_min_similarity if c.memory_version >= 2 else 0.0
             return [Hypothesis(p, "memory") for p in
                     self.memory.retrieve(fvec, 8, verified_only=c.use_simulator, min_similarity=min_sim)]
         if stage == "rag":
@@ -221,6 +225,12 @@ BASE = AgentConfig(name="A: Dense LLM")
 PROPOSED = AgentConfig(
     name="Proposed", n_samples=16, use_simulator=True, use_memory=True, use_experts=True,
     use_router=True, use_compose=True, use_repair=True, use_critic=True)
+
+
+# フェーズ1の結果を受けた新しい既定設定（PROPOSED は過去の結果の再現用にそのまま残す）
+# - Experts: 外したほうが +1.0 ポイント（Holm 補正後も有意）
+# - Repair: 組み合わせ探索が「検証済みの仮説を見つける」か「予算を使い切る」かのどちらかで必ず終わるため、一度も実行されない
+DEFAULT_V2 = PROPOSED.variant("Default v2", use_experts=False, use_repair=False)
 
 
 def baseline_configs():

@@ -101,34 +101,39 @@ def think_part(lm, wm, tasks):
     return rows
 
 
+CONDITIONS = ("real_only", "imagine_then_act", "imagination_only", "perfect_imagination")
+
+
+def choose(r, name, R):
+    """1問について、条件 name・現実の実験上限 R での (正解か, 現実の実験回数)。"""
+    n = r["pool"]
+    if name in ("real_only", "imagine_then_act"):
+        order = list(range(n)) if name == "real_only" else \
+            sorted(range(n), key=lambda i: (not r["imag_fit"][i], -r["imag_soft"][i], i))
+        chosen, used = (order[0] if order else None), 0
+        for k, i in enumerate(order[:R]):
+            used = k + 1
+            if r["real_fit"][i]:
+                chosen = i
+                break
+        return bool(chosen is not None and r["correct"][chosen]), used
+    fits = r["imag_fit"] if name == "imagination_only" else r["real_fit"]
+    chosen = next((i for i in range(n) if fits[i]), 0 if n else None)
+    return bool(chosen is not None and r["correct"][chosen]), 0
+
+
+def per_task_outcomes(rows):
+    return {name: {str(R): [list(choose(r, name, R)) for r in rows] for R in BUDGETS} for name in CONDITIONS}
+
+
 def simulate(rows):
     """記録から各条件の正答率と、現実での実験回数を計算する。"""
     res = {}
-    for name in ("real_only", "imagine_then_act", "imagination_only", "perfect_imagination"):
+    for name in CONDITIONS:
         per_budget = {}
         for R in BUDGETS:
-            acc, real = [], []
-            for r in rows:
-                n = r["pool"]
-                if name == "real_only":
-                    order = list(range(n))
-                elif name == "imagine_then_act":
-                    order = sorted(range(n), key=lambda i: (not r["imag_fit"][i], -r["imag_soft"][i], i))
-                if name in ("real_only", "imagine_then_act"):
-                    chosen, used = (order[0] if order else None), 0
-                    for k, i in enumerate(order[:R]):
-                        used = k + 1
-                        if r["real_fit"][i]:
-                            chosen = i
-                            break
-                    acc.append(chosen is not None and r["correct"][chosen])
-                    real.append(used)
-                else:
-                    fits = r["imag_fit"] if name == "imagination_only" else r["real_fit"]
-                    chosen = next((i for i in range(n) if fits[i]), 0 if n else None)
-                    acc.append(chosen is not None and r["correct"][chosen])
-                    real.append(0)
-            per_budget[R] = {"acc": sum(acc) / len(acc), "real": sum(real) / len(real)}
+            out = [choose(r, name, R) for r in rows]
+            per_budget[R] = {"acc": sum(c for c, _ in out) / len(out), "real": sum(u for _, u in out) / len(out)}
         res[name] = per_budget
     return res
 
