@@ -1,0 +1,23 @@
+checkpoints/
+*.pt
+__pycache__/
+results/train_log.txt
+results/main_log.txt
+results/discovery_log.txt
+results/quant_log.txt
+results/main_v1_log.txt
+results/memory_log*.txt
+results/scaling/train_*.txt
+results/scaling/eval_*.txt
+# 実験中は無視し、完了後に git add -f で追加
+results/scaling/*_seed*.json
+results/sleep_log_*.txt
+results/world_model/train_log.txt
+results/phase1/run_log.txt
+# フェーズ1の実行中は無視し、完了後に git add -f で追加
+results/phase1/agent/
+results/phase1/discovery/
+results/phase1/report.md
+results/world_model/eval_log.txt
+# フェーズ1.5の実行中は無視し、完了後に git add -f で追加
+results/phase1_5/
